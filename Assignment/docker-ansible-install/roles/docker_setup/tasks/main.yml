@@ -1,0 +1,45 @@
+---
+- name: Ensure Systemd is enabled on WSL
+  ansible.builtin.lineinfile:
+    path: /etc/wsl.conf
+    line: |
+      [boot]
+      systemd=true
+    create: yes
+  when: ansible_distribution == 'Ubuntu' and ansible_virtualization_type == 'wsl'
+
+- name: Install necessary packages for Docker
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+    update_cache: yes
+
+- name: Add Docker’s official GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker APT repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Update APT package index
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install Docker CE
+  ansible.builtin.apt:
+    name: docker-ce
+    state: present
+
+- name: Ensure Docker service is enabled and started
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes
+

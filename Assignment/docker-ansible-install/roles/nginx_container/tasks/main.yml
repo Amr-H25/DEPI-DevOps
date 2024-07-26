@@ -1,0 +1,15 @@
+---
+- name: Pull the latest NGINX image
+  community.docker.docker_image:
+    name: nginx
+    tag: latest
+    source: pull
+
+- name: Ensure NGINX container is running
+  community.docker.docker_container:
+    name: nginx
+    image: nginx:latest
+    state: started
+    ports:
+      - "3000:80"
+
